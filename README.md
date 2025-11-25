@@ -16,9 +16,9 @@ Dokumentasi mencakup beberapa artefak pemodelan seperti:
 
 ## 📝 Deskripsi Singkat Sistem
 
-**Sistem Monitoring Risiko Stunting Posyandu** adalah sistem yang digunakan untuk **Memprediksi dan memantau risiko stunting pada balita di Posyandu Bougenville desa Margasari Kecamatan Tigaraksa Kabupaten Tangerang**. 
+**Sistem Monitoring Risiko Stunting Posyandu** adalah sistem yang digunakan untuk **Memprediksi dan memantau risiko stunting pada balita di Posyandu Bougenville desa Margasari Kecamatan Tigaraksa Kabupaten Tangerang**. Klik link dibawah untuk selengkapnya.
 
-[Dokumen Laporan Penelitian](https://example.com)
+[Dokumen Laporan Penelitian](https://docs.google.com/document/d/1ZoFwWu4EAAuzPiZqyTBVVw9NBTRAz3HE/edit?usp=sharing&ouid=100629304192679567901&rtpof=true&sd=true)
 
 Fitur utama sistem antara lain:
 
@@ -48,8 +48,64 @@ Folder ini berisikan diagram dan gambar desain sistem diantaranya:
 │   ├── dependency-injection.png
 │   ├── activity-diagram.png
 │   ├── state-machine-diagram.png
-│   └── drawio.drawio
+│   └── SMRSP.drawio
 ```
+
+## 📊 Desain Sistem
+
+### Use Case Diagram
+
+<p align="center">
+  <img src="docs/use-case-diagram.png" alt="Use Case Diagram" width="70%">
+</p>
+
+### Class Diagram
+
+<p align="center">
+  <img src="docs/class-diagram.png" alt="Use Case Diagram" width="70%">
+</p>
+
+### Factory Method
+
+<p align="center">
+  <img src="docs/factory-method.png" alt="Use Case Diagram" width="70%">
+</p>
+
+### Builder
+
+<p align="center">
+  <img src="docs/builder.png" alt="Use Case Diagram" width="70%">
+</p>
+
+### Singleton
+
+<p align="center">
+  <img src="docs/singleton.png" alt="Use Case Diagram" width="40%">
+</p>
+
+### Sequence Diagram
+
+<p align="center">
+  <img src="docs/sequence-diagram.png" alt="Use Case Diagram" width="70%">
+</p>
+
+### Dependency Injection
+
+<p align="center">
+  <img src="docs/dependency-injection.png" alt="Use Case Diagram" width="90%">
+</p>
+
+### Activity Diagram
+
+<p align="center">
+  <img src="docs/activity-diagram.png" alt="Use Case Diagram" width="70%">
+</p>
+
+### State Machine Diagram
+
+<p align="center">
+  <img src="docs/state-machine-diagram.png" alt="Use Case Diagram" width="100%">
+</p>
 
 ## ⬇️ Cara Instalasi
 
