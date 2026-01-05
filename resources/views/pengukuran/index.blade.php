@@ -44,9 +44,21 @@
             </div>
         </div>
 
+        <div class="bg-white p-4 shadow-sm sm:rounded-lg mb-2">
+            <label class="block text-sm font-medium mb-1">
+                Pilih Jenis Grafik
+            </label>
+            <select id="metricSelect" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                <option value="tb_cm">Tinggi Badan (cm)</option>
+                <option value="bb_kg">Berat Badan (kg)</option>
+                <option value="lila_cm">LILA (cm)</option>
+            </select>
+        </div>
+
         <div class="bg-white p-4 shadow-sm sm:rounded-lg mb-6">
             <canvas id="grafikPertumbuhan" height="120"></canvas>
         </div>
+
 
         <div class="bg-white p-4 shadow-sm sm:rounded-lg">
             <table class="min-w-full text-sm">
@@ -83,36 +95,60 @@
         </div>
     </div>
 
-    @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-            const ctx = document.getElementById('grafikPertumbuhan').getContext('2d');
-
-            fetch("{{ route('pengukuran.grafik', $balita->id_balita) }}")
-                .then(res => res.json())
-                .then(data => {
-                    const labels = data.map(d => d.tanggal_ukur);
-                    const bb = data.map(d => d.bb_kg);
-                    const tb = data.map(d => d.tb_cm);
-
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels,
-                            datasets: [{
-                                    label: 'BB (kg)',
-                                    data: bb,
-                                    borderWidth: 2
-                                },
-                                {
-                                    label: 'TB (cm)',
-                                    data: tb,
-                                    borderWidth: 2
-                                },
-                            ]
-                        }
-                    });
-                });
-        </script>
-    @endpush
 </x-app-layout>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const pengukuranData = @json($pengukurans);
+
+    const labels = pengukuranData.map(p => p.umur_bulan);
+
+    const datasetsMap = {
+        tb_cm: {
+            label: 'Tinggi Badan (cm)',
+            data: pengukuranData.map(p => p.tb_cm),
+            backgroundColor: '#3B82F6'
+        },
+        bb_kg: {
+            label: 'Berat Badan (kg)',
+            data: pengukuranData.map(p => p.bb_kg),
+            backgroundColor: '#22C55E'
+        },
+        lila_cm: {
+            label: 'LILA (cm)',
+            data: pengukuranData.map(p => p.lila_cm),
+            backgroundColor: '#F59E0B'
+        }
+    };
+</script>
+
+<script>
+    const ctx = document.getElementById('grafikPertumbuhan');
+
+    let chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [datasetsMap.tb_cm] // default TB
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+<script>
+    document.getElementById('metricSelect').addEventListener('change', function () {
+        const selected = this.value;
+
+        chart.data.datasets = [datasetsMap[selected]];
+        chart.update();
+    });
+</script>

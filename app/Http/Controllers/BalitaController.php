@@ -3,14 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Balita;
+use App\Models\Pengukuran;
 use Illuminate\Http\Request;
 
 class BalitaController extends Controller
 {
     public function dashboard()
     {
-        $totalBalita = Balita::count();
-        return view('dashboard', compact('totalBalita'));
+       $totalBalita = Balita::count();
+
+        // Pie 1: Jenis Kelamin
+        $jumlahLaki = Balita::where('jenis_kelamin', 'L')->count();
+        $jumlahPerempuan = Balita::where('jenis_kelamin', 'P')->count();
+
+        // Pie 2: Status Stunting (berdasarkan pengukuran terakhir)
+        $stunting = Pengukuran::where('status_stunting', true)->count();
+        $tidakStunting = Pengukuran::where('status_stunting', false)->count();
+
+        return view('dashboard', compact(
+            'totalBalita',
+            'jumlahLaki',
+            'jumlahPerempuan',
+            'stunting',
+            'tidakStunting'
+        ));
     }
 
     public function index(Request $request)
