@@ -17,7 +17,7 @@ class PengukuranController extends Controller
     {
         $pengukurans = $balita->pengukurans()
             ->with('hasilPrediksi')
-            ->orderBy('tanggal_ukur', 'asc')
+            ->orderBy('tanggal_ukur', 'desc')
             ->get();
 
         // // NANTI (contoh): ambil hasil prediksi paling terbaru (diasumsikan untuk bulan depan)
@@ -49,6 +49,10 @@ class PengukuranController extends Controller
         $umurBulan = Carbon::parse($balita->tanggal_lahir)
             ->diffInMonths(Carbon::parse($tanggalUkur));
 
+        // CONTOH RULE SEDERHANA (BUKAN WHO)
+        $rasioTbUmur = $validated['tb_cm'] / max($umurBulan, 1);
+        $statusStunting = $rasioTbUmur < 1.8; // true = stunting
+
         $pengukuran = Pengukuran::create([
             'id_balita'    => $balita->id_balita,
             'id_user'      => Auth::id(),
@@ -57,32 +61,32 @@ class PengukuranController extends Controller
             'bb_kg'        => $validated['bb_kg'],
             'tb_cm'        => $validated['tb_cm'],
             'lila_cm'      => $validated['lila_cm'] ?? null,
-            'status_stunting' => null, // bisa diisi nanti atau dari API
+            'status_stunting' => $statusStunting,
         ]);
 
         // === PANGGIL API DENGAN SINGLETON ===
-        $client = PredictionClient::getInstance();
+        // $client = PredictionClient::getInstance();
 
-        $data = $client->predict([
-            'umur_bulan'    => $umurBulan,
-            'bb_kg'         => $pengukuran->bb_kg,
-            'tb_cm'         => $pengukuran->tb_cm,
-            'lila_cm'       => $pengukuran->lila_cm,
-            'jenis_kelamin' => $balita->jenis_kelamin,
-        ]);
+        // $data = $client->predict([
+        //     'umur_bulan'    => $umurBulan,
+        //     'bb_kg'         => $pengukuran->bb_kg,
+        //     'tb_cm'         => $pengukuran->tb_cm,
+        //     'lila_cm'       => $pengukuran->lila_cm,
+        //     'jenis_kelamin' => $balita->jenis_kelamin,
+        // ]);
 
-        if (!empty($data)) {
-            HasilPrediksi::create([
-                'id_ukur'    => $pengukuran->id_ukur,
-                'label_pred' => $data['label_pred'] ?? false,
-                'prob_pred'  => $data['prob_pred'] ?? 0,
-            ]);
+        // if (!empty($data)) {
+        //     HasilPrediksi::create([
+        //         'id_ukur'    => $pengukuran->id_ukur,
+        //         'label_pred' => $data['label_pred'] ?? false,
+        //         'prob_pred'  => $data['prob_pred'] ?? 0,
+        //     ]);
 
-            // sinkronkan status_stunting
-            $pengukuran->update([
-                'status_stunting' => $data['label_pred'] ?? null,
-            ]);
-        }
+        //     // sinkronkan status_stunting
+        //     $pengukuran->update([
+        //         'status_stunting' => $data['label_pred'] ?? null,
+        //     ]);
+        // }
 
 
         return redirect()

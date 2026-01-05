@@ -69,7 +69,7 @@
                         <th class="py-2 text-left">BB (kg)</th>
                         <th class="py-2 text-left">TB (cm)</th>
                         <th class="py-2 text-left">LILA (cm)</th>
-                        <th class="py-2 text-left">Prediksi</th>
+                        <th class="py-2 text-left">Status Stunting</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -80,14 +80,11 @@
                             <td class="py-2">{{ $p->bb_kg }}</td>
                             <td class="py-2">{{ $p->tb_cm }}</td>
                             <td class="py-2">{{ $p->lila_cm }}</td>
-                            <td class="py-2">
-                                @if ($p->hasilPrediksi)
-                                    {{ $p->hasilPrediksi->label_pred ? 'Risiko Stunting' : 'Tidak' }}
-                                    ({{ number_format($p->hasilPrediksi->prob_pred * 100, 2) }}%)
-                                @else
-                                    -
-                                @endif
-                            </td>
+                            @if ($p->status_stunting == 0)
+                                <td class="py-2 text-green-600 font-semibold">Aman</td>
+                            @else
+                                <td class="py-2 text-red-600 font-semibold">Stunting</td>
+                            @endif
                         </tr>
                     @endforeach
                 </tbody>
@@ -145,7 +142,7 @@
 </script>
 
 <script>
-    document.getElementById('metricSelect').addEventListener('change', function () {
+    document.getElementById('metricSelect').addEventListener('change', function() {
         const selected = this.value;
 
         chart.data.datasets = [datasetsMap[selected]];
