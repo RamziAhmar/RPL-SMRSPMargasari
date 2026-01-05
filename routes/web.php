@@ -28,15 +28,18 @@ Route::middleware(['auth'])->group(function () {
             'balita' => 'balita',
         ]);
 
-        // Pengukuran dan grafik
         Route::get('balita/{balita}/pengukuran', [PengukuranController::class, 'index'])->name('pengukuran.index');
-        Route::get('balita/{balita}/pengukuran/create', [PengukuranController::class, 'create'])->name('pengukuran.create');
-        Route::post('balita/{balita}/pengukuran', [PengukuranController::class, 'store'])->name('pengukuran.store');
+
 
         // data grafik JSON
         Route::get('balita/{balita}/grafik', [PengukuranController::class, 'grafikData'])->name('pengukuran.grafik');
     });
 
+    Route::middleware(['role:kader'])->group(function () {
+        // Pengukuran dan grafik
+        Route::get('balita/{balita}/pengukuran/create', [PengukuranController::class, 'create'])->name('pengukuran.create');
+        Route::post('balita/{balita}/pengukuran', [PengukuranController::class, 'store'])->name('pengukuran.store');
+    });
     Route::middleware('role:admin')->group(function () {
         Route::resource('users', UserController::class)->except(['show']);
         Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');

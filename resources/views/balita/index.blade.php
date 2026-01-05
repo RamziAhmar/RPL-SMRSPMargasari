@@ -68,9 +68,11 @@
                             <td class="py-2">{{ $b->jenis_kelamin }}</td>
                             <td class="py-2">{{ $b->nama_ibu }}</td>
                             <td class="py-2">
+                                @if (Auth::user() && Auth::user()->role === 'kader')
                                 <a href="{{ route('pengukuran.create', $b->id_balita) }}" class="text-blue-600">
                                     Pengukuran
                                 </a> |
+                                @endif
                                 <a href="{{ route('pengukuran.index', $b->id_balita) }}" class="text-blue-600">
                                     Detail
                                 </a> |
@@ -78,8 +80,8 @@
                                     Edit
                                 </a>
                                 <form action="{{ route('balita.destroy', $b) }}" method="POST" class="inline"
-                                    onsubmit="return confirm('Hapus data?')">
-                                    @csrf @method('DELETE')
+                                onsubmit="return confirm('Hapus data?')">
+                                @csrf @method('DELETE')
                                     <button class="text-red-600">Hapus</button>
                                 </form>
                             </td>

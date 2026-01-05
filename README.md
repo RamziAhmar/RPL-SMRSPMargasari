@@ -78,7 +78,7 @@ Folder ini berisikan diagram dan gambar desain sistem diantaranya:
 ### Factory Method
 
 <p align="center">
-  <img src="docs/factory-method.jpg" alt="Use Case Diagram" width="70%">
+  <img src="docs/factory-method.jpg" alt="Use Case Diagram" width="50%">
 </p>
 
 ### Builder
@@ -108,13 +108,13 @@ Folder ini berisikan diagram dan gambar desain sistem diantaranya:
 ### Activity Diagram
 
 <p align="center">
-  <img src="docs/activity-diagram.png" alt="Use Case Diagram" width="70%">
+  <img src="docs/activity-diagram.png" alt="Use Case Diagram" width="50%">
 </p>
 
 ### State Machine Diagram
 
 <p align="center">
-  <img src="docs/state-machine-diagram.png" alt="Use Case Diagram" width="100%">
+  <img src="docs/state-machine-diagram.png" alt="Use Case Diagram" width="80%">
 </p>
 
 ---
