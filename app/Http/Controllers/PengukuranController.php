@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Balita;
 use App\Models\Pengukuran;
 use App\Models\HasilPrediksi;
+use App\Services\PredictionClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -59,30 +60,30 @@ class PengukuranController extends Controller
             'status_stunting' => null, // bisa diisi nanti atau dari API
         ]);
 
-        // --- Panggil API Python Random Forest ---
-        // misal API FastAPI kamu jalan di http://127.0.0.1:8001/predict
-        // $response = Http::post('http://127.0.0.1:8001/predict', [
-        //     'umur_bulan'    => $umurBulan,
-        //     'bb_kg'         => $pengukuran->bb_kg,
-        //     'tb_cm'         => $pengukuran->tb_cm,
-        //     'lila_cm'       => $pengukuran->lila_cm,
-        //     'jenis_kelamin' => $balita->jenis_kelamin,
-        // ]);
+        // === PANGGIL API DENGAN SINGLETON ===
+        $client = PredictionClient::getInstance();
 
-        // if ($response->ok()) {
-        //     $data = $response->json();
+        $data = $client->predict([
+            'umur_bulan'    => $umurBulan,
+            'bb_kg'         => $pengukuran->bb_kg,
+            'tb_cm'         => $pengukuran->tb_cm,
+            'lila_cm'       => $pengukuran->lila_cm,
+            'jenis_kelamin' => $balita->jenis_kelamin,
+        ]);
 
-        //     HasilPrediksi::create([
-        //         'id_ukur'   => $pengukuran->id_ukur,
-        //         'label_pred' => $data['label_pred'] ?? false,
-        //         'prob_pred' => $data['prob_pred'] ?? 0,
-        //     ]);
+        if (!empty($data)) {
+            HasilPrediksi::create([
+                'id_ukur'    => $pengukuran->id_ukur,
+                'label_pred' => $data['label_pred'] ?? false,
+                'prob_pred'  => $data['prob_pred'] ?? 0,
+            ]);
 
-        //     // opsional update status_stunting dari label_pred
-        //     $pengukuran->update([
-        //         'status_stunting' => $data['label_pred'] ?? null,
-        //     ]);
-        // }
+            // sinkronkan status_stunting
+            $pengukuran->update([
+                'status_stunting' => $data['label_pred'] ?? null,
+            ]);
+        }
+
 
         return redirect()
             ->route('balita.index', $balita->id_balita)

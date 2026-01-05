@@ -72,19 +72,19 @@ Folder ini berisikan diagram dan gambar desain sistem diantaranya:
 ### Class Diagram
 
 <p align="center">
-  <img src="docs/class-diagram.png" alt="Use Case Diagram" width="70%">
+  <img src="docs/class-diagram.jpg" alt="Use Case Diagram" width="70%">
 </p>
 
 ### Factory Method
 
 <p align="center">
-  <img src="docs/factory-method.png" alt="Use Case Diagram" width="70%">
+  <img src="docs/factory-method.jpg" alt="Use Case Diagram" width="70%">
 </p>
 
 ### Builder
 
 <p align="center">
-  <img src="docs/builder.png" alt="Use Case Diagram" width="70%">
+  <img src="docs/builder.jpg" alt="Use Case Diagram" width="70%">
 </p>
 
 ### Singleton

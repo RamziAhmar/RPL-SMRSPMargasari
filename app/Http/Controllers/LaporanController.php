@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Builders\LaporanPengukuranBuilder;
+use App\Factories\ReportFactory;
 use App\Models\Pengukuran;
 use App\Models\Balita;
 
@@ -11,37 +13,45 @@ class LaporanController extends Controller
     // Tampilkan form + hasil laporan
     public function index(Request $request)
     {
-        $tanggalMulai  = $request->input('tanggal_mulai');
+        $tanggalMulai   = $request->input('tanggal_mulai');
         $tanggalSelesai = $request->input('tanggal_selesai');
 
-        $pengukuran = collect(); // default kosong
+        $pengukuran = collect();
 
         if ($tanggalMulai && $tanggalSelesai) {
-            $pengukuran = Pengukuran::with('balita')
-                ->whereBetween('created_at', [$tanggalMulai, $tanggalSelesai])
-                ->orderBy('created_at')
+            $pengukuran = (new LaporanPengukuranBuilder())
+                ->betweenTanggal($tanggalMulai, $tanggalSelesai)
+                ->orderByTanggal()
                 ->get();
         }
 
-        return view('laporan.index', compact('pengukuran', 'tanggalMulai', 'tanggalSelesai'));
+        $report = ReportFactory::make('html');
+
+        return $report->render([
+            'pengukuran'     => $pengukuran,
+            'tanggalMulai'   => $tanggalMulai,
+            'tanggalSelesai' => $tanggalSelesai,
+        ]);
     }
 
     // Cetak PDF
     public function cetak(Request $request)
     {
-        $tanggalMulai  = $request->input('tanggal_mulai');
+        $tanggalMulai   = $request->input('tanggal_mulai');
         $tanggalSelesai = $request->input('tanggal_selesai');
 
-        $pengukuran = Pengukuran::with('balita')
-            ->whereBetween('created_at', [$tanggalMulai, $tanggalSelesai])
-            ->orderBy('created_at')
+        $pengukuran = (new LaporanPengukuranBuilder())
+            ->betweenTanggal($tanggalMulai, $tanggalSelesai)
+            ->orderByTanggal()
             ->get();
 
-        // Contoh jika pakai dompdf
-        // $pdf = PDF::loadView('laporan.pdf', compact('pengukuran', 'tanggalMulai', 'tanggalSelesai'));
-        // return $pdf->download("laporan-{$tanggalMulai}-sd-{$tanggalSelesai}.pdf");
+        // Factory Method
+        $report = ReportFactory::make('pdf');
 
-        // Kalau belum pakai pdf, untuk sementara bisa return view biasa
-        return view('laporan.cetak', compact('pengukuran', 'tanggalMulai', 'tanggalSelesai'));
+        return $report->render([
+            'pengukuran'     => $pengukuran,
+            'tanggalMulai'   => $tanggalMulai,
+            'tanggalSelesai' => $tanggalSelesai,
+        ]);
     }
 }
