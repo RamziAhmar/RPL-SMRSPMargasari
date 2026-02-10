@@ -7,9 +7,9 @@ Repositori ini berisi dokumentasi pengembangan **Sistem Monitoring Risiko Stunti
 ## 🧭 Daftar Isi
 
 - [Deskripsi Singkat Sistem](#deskripsi-singkat-sistem)
-- [Standar Implementasi dan Coding Convention](#standar-implementasi-dan-coding-convention)
 - [Tahapan Software Testing](#tahapan-software-testing)
 - [Peran Software Quality Assurance (SQA)](#peran-software-quality-assurance-sqa)
+- [Standar Implementasi dan Coding Convention](#standar-implementasi-dan-coding-convention)
 - [Struktur Folder Desain Sistem](#struktur-folder-desain-sistem)
 - [Desain Sistem](#desain-sistem)
   - [Use Case Diagram](#use-case-diagram)
@@ -22,6 +22,23 @@ Repositori ini berisi dokumentasi pengembangan **Sistem Monitoring Risiko Stunti
   - [Activity Diagram](#activity-diagram)
   - [State Machine Diagram](#state-machine-diagram)
 - [Cara Instalasi](#cara-instalasi)
+
+---
+
+## 📝 Deskripsi Singkat Sistem
+
+**Sistem Monitoring Risiko Stunting Posyandu** adalah sistem yang digunakan untuk **Memprediksi dan memantau risiko stunting pada balita di Posyandu Bougenville desa Margasari Kecamatan Tigaraksa Kabupaten Tangerang**. Klik link dibawah untuk selengkapnya.
+
+[Dokumen Laporan Penelitian (Template JISKa)](https://docs.google.com/document/d/1ZoFwWu4EAAuzPiZqyTBVVw9NBTRAz3HE/edit?usp=sharing&ouid=100629304192679567901&rtpof=true&sd=true)
+
+Fitur utama sistem antara lain:
+
+- ✅ Fitur 1 – *Kelola Data Balita*
+- ✅ Fitur 2 – *Pengukuran Antopometri*
+- ✅ Fitur 3 – *Klasifikasi dan Predisi Stunting*
+- ✅ Fitur 4 – *Laporan Kegiatan*
+- ✅ Fitur 5 – *Dashboard Monitoring*
+- ✅ Fitur 6 – *Kelola User*
 
 ---
 
@@ -57,24 +74,6 @@ Peran SQA dalam sistem ini meliputi:
 - Mendukung kemudahan pemeliharaan dan pengembangan sistem
 
 Dengan penerapan SQA, kualitas sistem dapat terjaga secara berkelanjutan dan sistem dapat digunakan secara optimal di lingkungan posyandu.
-
----
-
-## 📝 Deskripsi Singkat Sistem
-
-**Sistem Monitoring Risiko Stunting Posyandu** adalah sistem yang digunakan untuk **Memprediksi dan memantau risiko stunting pada balita di Posyandu Bougenville desa Margasari Kecamatan Tigaraksa Kabupaten Tangerang**. Klik link dibawah untuk selengkapnya.
-
-[Dokumen Laporan Penelitian (Template JISKa)](https://docs.google.com/document/d/1ZoFwWu4EAAuzPiZqyTBVVw9NBTRAz3HE/edit?usp=sharing&ouid=100629304192679567901&rtpof=true&sd=true)
-
-Fitur utama sistem antara lain:
-
-- ✅ Fitur 1 – *Kelola Data Balita*
-- ✅ Fitur 2 – *Pengukuran Antopometri*
-- ✅ Fitur 3 – *Klasifikasi dan Predisi Stunting*
-- ✅ Fitur 4 – *Laporan Kegiatan*
-- ✅ Fitur 5 – *Dashboard Monitoring*
-- ✅ Fitur 6 – *Kelola User*
-
 
 ---
 
