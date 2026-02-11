@@ -27,9 +27,7 @@ Repositori ini berisi dokumentasi pengembangan **Sistem Monitoring Risiko Stunti
 
 ## 📝 Deskripsi Singkat Sistem
 
-**Sistem Monitoring Risiko Stunting Posyandu** adalah sistem yang digunakan untuk **Memprediksi dan memantau risiko stunting pada balita di Posyandu Bougenville desa Margasari Kecamatan Tigaraksa Kabupaten Tangerang**. Klik link dibawah untuk selengkapnya.
-
-[Dokumen Laporan Penelitian (Template JISKa)](https://docs.google.com/document/d/1ZoFwWu4EAAuzPiZqyTBVVw9NBTRAz3HE/edit?usp=sharing&ouid=100629304192679567901&rtpof=true&sd=true)
+**Sistem Monitoring Risiko Stunting Posyandu** adalah sistem yang digunakan untuk **Memprediksi dan memantau risiko stunting pada balita di Posyandu Bougenville desa Margasari Kecamatan Tigaraksa Kabupaten Tangerang**. 
 
 Fitur utama sistem antara lain:
 
