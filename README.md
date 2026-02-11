@@ -194,4 +194,4 @@ buka terminal baru dan jalankan
 ```
 php artisan serve
 ```
-Server akan berkalan di localhost:9000
+Server akan berjalan di localhost:8000
