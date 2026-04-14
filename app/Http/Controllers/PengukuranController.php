@@ -20,16 +20,54 @@ class PengukuranController extends Controller
             ->orderBy('tanggal_ukur', 'desc')
             ->get();
 
-        // // NANTI (contoh): ambil hasil prediksi paling terbaru (diasumsikan untuk bulan depan)
-        // $latestPrediction = $balita->pengukurans()
-        //     ->with('hasilPrediksi')
-        //     ->whereDate('tanggal_ukur', '<=', now())
-        //     ->orderByDesc('tanggal_ukur')
-        //     ->first()?->hasilPrediksi;
-        //
-        // return view('pengukuran.index', compact('balita', 'pengukurans', 'latestPrediction'));
+        $latest = $pengukurans->first();
+        $simulasi = null;
 
-        return view('pengukuran.index', compact('balita', 'pengukurans'));
+        if ($latest) {
+
+            $prev = $pengukurans->skip(1)->first();
+
+            $delta = 0.5;
+
+            if ($prev) {
+                $delta = $latest->tb_cm - $prev->tb_cm;
+            }
+
+            try {
+                $response = Http::timeout(5)->post('http://127.0.0.1:5000/simulasi', [
+                    'umur' => intval($latest->umur_bulan),
+                    'tinggi' => floatval($latest->tb_cm),
+                    'delta_tinggi' => floatval($delta),
+                    'gender' => $balita->jenis_kelamin
+                ]);
+
+                // 🔥 DEBUG (sementara saja)
+                // dd($response->json());
+
+                if ($response->successful()) {
+
+                    $data = $response->json();
+
+                    // cek kalau API return error
+                    if (isset($data['error'])) {
+                        \Log::error("API returned error: " . $data['error']);
+                        $simulasi = null;
+                    } else {
+                        $simulasi = $data;
+                    }
+                } else {
+                    \Log::error("API gagal: " . $response->status());
+                }
+            } catch (\Exception $e) {
+                \Log::error("API error: " . $e->getMessage());
+            }
+        }
+
+        return view('pengukuran.index', compact(
+            'balita',
+            'pengukurans',
+            'simulasi'
+        ));
     }
 
     public function create(Balita $balita)

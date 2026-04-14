@@ -12,35 +12,28 @@
             <x-back-button :href="route('balita.index')" />
         </div>
 
-        @php
-            // ambil pengukuran terakhir (paling baru) beserta hasilPrediksi-nya
-            $latestMeasurement = $pengukurans->sortByDesc('tanggal_ukur')->first();
-            $latestPred = $latestMeasurement?->hasilPrediksi;
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="mb-3">Simulasi Risiko Stunting</h5>
 
-            $baseClass = 'w-full rounded-md px-4 py-3 font-semibold text-sm sm:text-base text-center shadow';
-            $bannerClass = 'bg-gray-200 text-gray-800 border border-gray-300';
-            $labelText = 'Hasil prediksi bulan depan: belum tersedia';
-            $detailText = '';
+                @if (!empty($simulasi))
+                    <canvas id="chartSimulasi"></canvas>
 
-            if ($latestPred) {
-                if ($latestPred->label_pred) {
-                    // prediksi akan stunting → MERAH
-                    $bannerClass = 'bg-red-500 text-white border border-red-600';
-                    $labelText = 'Hasil prediksi bulan depan: RISIKO STUNTING';
-                } else {
-                    // aman → HIJAU
-                    $bannerClass = 'bg-green-500 text-white border border-green-600';
-                    $labelText = 'Hasil prediksi bulan depan: AMAN';
-                }
+                    <div class="mt-3">
+                        <strong>Umur Risiko Stunting:</strong><br>
 
-                $percent = number_format($latestPred->prob_pred * 100, 2);
-                $detailText = " (Probabilitas: {$percent}%)";
-            }
-        @endphp
+                    </div>
+                @else
+                    <p class="text-muted">Data simulasi belum tersedia</p>
+                @endif
+            </div>
+        </div>
 
         <div class="mb-4">
-            <div class="{{ $baseClass . ' ' . $bannerClass }}">
-                {{ $labelText }}{!! $detailText !!}
+            <div class="w-full rounded-md px-4 py-3 font-semibold text-sm sm:text-base text-center shadow bg-gray-200 text-gray-800 border border-gray-300">
+                Normal: {{ $simulasi['normal']['umur_stunting'] ?? 'Aman' }} <br>
+                Membaik: {{ $simulasi['baik']['umur_stunting'] ?? 'Aman' }} <br>
+                Memburuk: {{ $simulasi['buruk']['umur_stunting'] ?? 'Aman' }}
             </div>
         </div>
 
@@ -96,6 +89,63 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+@if (isset($simulasi))
+    <script>
+        const normal = @json($simulasi['normal']['data']);
+        const baik = @json($simulasi['baik']['data']);
+        const buruk = @json($simulasi['buruk']['data']);
+
+        const labelsSimulasi = normal.map(d => d.umur);
+
+        const dataNormal = normal.map(d => d.z_score);
+        const dataBaik = baik.map(d => d.z_score);
+        const dataBuruk = buruk.map(d => d.z_score);
+
+        const ctxSimulasi = document.getElementById('chartSimulasi');
+
+        new Chart(ctxSimulasi, {
+            type: 'line',
+            data: {
+                labels: labelsSimulasi,
+                datasets: [{
+                        label: 'Normal (ML)',
+                        data: dataNormal,
+                        borderColor: 'blue',
+                        fill: false
+                    },
+                    {
+                        label: 'Membaik',
+                        data: dataBaik,
+                        borderColor: 'green',
+                        fill: false
+                    },
+                    {
+                        label: 'Memburuk',
+                        data: dataBuruk,
+                        borderColor: 'red',
+                        fill: false
+                    },
+                    {
+                        label: 'Batas Stunting (-2)',
+                        data: labelsSimulasi.map(() => -2),
+                        borderDash: [5, 5],
+                        borderColor: 'black',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    </script>
+@endif
+
 <script>
     const pengukuranData = @json($pengukurans);
 
@@ -121,12 +171,13 @@
 </script>
 
 <script>
-    const ctx = document.getElementById('grafikPertumbuhan');
+    const labelsPertumbuhan = pengukuranData.map(p => p.umur_bulan);
+    const ctxPertumbuhan = document.getElementById('grafikPertumbuhan');
 
-    let chart = new Chart(ctx, {
+    let chart = new Chart(ctxPertumbuhan, {
         type: 'bar',
         data: {
-            labels: labels,
+            labels: labelsPertumbuhan,
             datasets: [datasetsMap.tb_cm] // default TB
         },
         options: {
