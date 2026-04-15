@@ -9,7 +9,7 @@ use App\Http\Controllers\PengukuranController;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('dashboard');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -29,21 +29,20 @@ Route::middleware(['auth'])->group(function () {
         ]);
 
         Route::get('balita/{balita}/pengukuran', [PengukuranController::class, 'index'])->name('pengukuran.index');
+        // Pengukuran dan grafik
+        Route::get('balita/{balita}/pengukuran/create', [PengukuranController::class, 'create'])->name('pengukuran.create');
+        Route::post('balita/{balita}/pengukuran', [PengukuranController::class, 'store'])->name('pengukuran.store');
 
+        // Laporan
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/cetak', [LaporanController::class, 'cetak'])->name('laporan.cetak');
 
         // data grafik JSON
         Route::get('balita/{balita}/grafik', [PengukuranController::class, 'grafikData'])->name('pengukuran.grafik');
     });
 
-    Route::middleware(['role:kader'])->group(function () {
-        // Pengukuran dan grafik
-        Route::get('balita/{balita}/pengukuran/create', [PengukuranController::class, 'create'])->name('pengukuran.create');
-        Route::post('balita/{balita}/pengukuran', [PengukuranController::class, 'store'])->name('pengukuran.store');
-    });
     Route::middleware('role:admin')->group(function () {
         Route::resource('users', UserController::class)->except(['show']);
-        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
-        Route::get('/laporan/cetak', [LaporanController::class, 'cetak'])->name('laporan.cetak');
     });
 });
 

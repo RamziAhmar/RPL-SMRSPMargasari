@@ -20,11 +20,9 @@
                         {{ __('Data Balita & Pengukuran') }}
                     </x-nav-link>
 
-                    @if (Auth::user() && Auth::user()->role === 'admin')
-                        <x-nav-link :href="route('laporan.index')" :active="request()->routeIs('laporan.*')">
-                            {{ __('Laporan') }}
-                        </x-nav-link>
-                    @endif
+                    <x-nav-link :href="route('laporan.index')" :active="request()->routeIs('laporan.*')">
+                        {{ __('Laporan') }}
+                    </x-nav-link>
 
                     @if (Auth::user() && Auth::user()->role === 'admin')
                         <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">

@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Balita;
 use App\Models\Pengukuran;
-use App\Models\HasilPrediksi;
-use App\Services\PredictionClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -41,7 +39,7 @@ class PengukuranController extends Controller
                     'gender' => $balita->jenis_kelamin
                 ]);
 
-                // 🔥 DEBUG (sementara saja)
+                // DEBUG 
                 // dd($response->json());
 
                 if ($response->successful()) {
@@ -78,19 +76,59 @@ class PengukuranController extends Controller
     public function store(Request $request, Balita $balita)
     {
         $validated = $request->validate([
-            'bb_kg'        => 'required|numeric',
-            'tb_cm'        => 'required|numeric',
-            'lila_cm'      => 'nullable|numeric',
+            'bb_kg'   => 'required|numeric',
+            'tb_cm'   => 'required|numeric',
+            'lila_cm' => 'nullable|numeric',
         ]);
 
         $tanggalUkur = Carbon::now()->toDateString();
-        $umurBulan = Carbon::parse($balita->tanggal_lahir)
-            ->diffInMonths(Carbon::parse($tanggalUkur));
 
-        // CONTOH RULE SEDERHANA (BUKAN WHO)
-        $rasioTbUmur = $validated['tb_cm'] / max($umurBulan, 1);
-        $statusStunting = $rasioTbUmur < 1.8; // true = stunting
+        $umurBulan = (int) round(
+            Carbon::parse($balita->tanggal_lahir)
+                ->diffInMonths(Carbon::parse($tanggalUkur))
+        );
 
+        // =========================
+        // HITUNG DELTA TINGGI
+        // =========================
+        $last = Pengukuran::where('id_balita', $balita->id_balita)
+            ->latest('tanggal_ukur')
+            ->first();
+
+        if ($last) {
+            $deltaTinggi = $validated['tb_cm'] - $last->tb_cm;
+        } else {
+            $deltaTinggi = 0.5; // default awal
+        }
+
+        // =========================
+        // HIT API PYTHON
+        // =========================
+        $response = Http::post('http://127.0.0.1:5000/predict', [
+            'umur' => $umurBulan,
+            'tinggi' => $validated['tb_cm'],
+            'delta_tinggi' => $deltaTinggi,
+            'gender' => $balita->jenis_kelamin == 'L' ? 'L' : 'P'
+        ]);
+
+        // dd($response->body());
+
+        if (!$response->successful()) {
+            return back()->with('error', 'Gagal menghubungi API AI');
+        }
+
+        $result = $response->json();
+
+
+        if (isset($result['error'])) {
+            return back()->with('error', $result['error']);
+        }
+
+        $statusStunting = $result['status_stunting'];
+
+        // =========================
+        // SIMPAN DATA
+        // =========================
         $pengukuran = Pengukuran::create([
             'id_balita'    => $balita->id_balita,
             'id_user'      => Auth::id(),
@@ -102,34 +140,9 @@ class PengukuranController extends Controller
             'status_stunting' => $statusStunting,
         ]);
 
-        // === PANGGIL API DENGAN SINGLETON ===
-        // $client = PredictionClient::getInstance();
-
-        // $data = $client->predict([
-        //     'umur_bulan'    => $umurBulan,
-        //     'bb_kg'         => $pengukuran->bb_kg,
-        //     'tb_cm'         => $pengukuran->tb_cm,
-        //     'lila_cm'       => $pengukuran->lila_cm,
-        //     'jenis_kelamin' => $balita->jenis_kelamin,
-        // ]);
-
-        // if (!empty($data)) {
-        //     HasilPrediksi::create([
-        //         'id_ukur'    => $pengukuran->id_ukur,
-        //         'label_pred' => $data['label_pred'] ?? false,
-        //         'prob_pred'  => $data['prob_pred'] ?? 0,
-        //     ]);
-
-        //     // sinkronkan status_stunting
-        //     $pengukuran->update([
-        //         'status_stunting' => $data['label_pred'] ?? null,
-        //     ]);
-        // }
-
-
         return redirect()
             ->route('balita.index', $balita->id_balita)
-            ->with('success', 'Pengukuran dan prediksi berhasil disimpan');
+            ->with('success', 'Pengukuran & analisis WHO berhasil disimpan');
     }
 
     public function grafikData(Balita $balita)
