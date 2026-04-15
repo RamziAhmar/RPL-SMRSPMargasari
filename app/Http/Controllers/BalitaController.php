@@ -5,27 +5,65 @@ namespace App\Http\Controllers;
 use App\Models\Balita;
 use App\Models\Pengukuran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BalitaController extends Controller
 {
     public function dashboard()
     {
-       $totalBalita = Balita::count();
-
-        // Pie 1: Jenis Kelamin
+        $totalBalita = Balita::count();
+        $totalPengukuran = Pengukuran::count();
+        $stunting = Pengukuran::where('status_stunting', true)->count();
+        $tidakStunting = Pengukuran::where('status_stunting', false)->count();
         $jumlahLaki = Balita::where('jenis_kelamin', 'L')->count();
         $jumlahPerempuan = Balita::where('jenis_kelamin', 'P')->count();
 
-        // Pie 2: Status Stunting (berdasarkan pengukuran terakhir)
-        $stunting = Pengukuran::where('status_stunting', true)->count();
-        $tidakStunting = Pengukuran::where('status_stunting', false)->count();
+        $persenStunting = $totalPengukuran > 0
+            ? round(($stunting / $totalPengukuran) * 100, 1)
+            : 0;
+
+        $grafikBayiBaruLahir = DB::table('pengukuran')
+            ->select(
+                DB::raw('DATE_FORMAT(tanggal_ukur, "%Y-%m") as bulan'),
+                DB::raw('AVG(bb_kg) as avg_bb'),
+                DB::raw('AVG(tb_cm) as avg_tb')
+            )
+            ->where('umur_bulan', '<=', 1)
+            ->groupBy('bulan')
+            ->orderBy('bulan')
+            ->get();
+
+        $stuntingPerBulan = DB::table('pengukuran')
+            ->select(
+                DB::raw('DATE_FORMAT(tanggal_ukur, "%Y-%m") as bulan'),
+                DB::raw('COUNT(*) as jumlah')
+            )
+            ->where('status_stunting', 1)
+            ->groupBy('bulan')
+            ->orderBy('bulan')
+            ->get();
+
+        $stuntingPerTahun = DB::table('pengukuran')
+            ->select(
+                DB::raw('YEAR(tanggal_ukur) as tahun'),
+                DB::raw('COUNT(*) as jumlah')
+            )
+            ->where('status_stunting', 1)
+            ->groupBy('tahun')
+            ->orderBy('tahun')
+            ->get();
 
         return view('dashboard', compact(
             'totalBalita',
             'jumlahLaki',
             'jumlahPerempuan',
             'stunting',
-            'tidakStunting'
+            'tidakStunting',
+            'persenStunting',
+            'totalPengukuran',
+            'grafikBayiBaruLahir',
+            'stuntingPerBulan',
+            'stuntingPerTahun'
         ));
     }
 
