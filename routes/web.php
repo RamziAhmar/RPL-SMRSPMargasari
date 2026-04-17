@@ -31,7 +31,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('balita/{balita}/pengukuran', [PengukuranController::class, 'index'])->name('pengukuran.index');
         // Pengukuran dan grafik
         Route::get('balita/{balita}/pengukuran/create', [PengukuranController::class, 'create'])->name('pengukuran.create');
+        Route::put('balita/{balita}/pengukuran/{pengukuran}', [PengukuranController::class, 'update'])->name('pengukuran.update');
+        Route::delete('balita/{balita}/pengukuran/{pengukuran}', [PengukuranController::class, 'destroy'])->name('pengukuran.destroy');
         Route::post('balita/{balita}/pengukuran', [PengukuranController::class, 'store'])->name('pengukuran.store');
+        
+        Route::get('pengukuran/{pengukuran}/edit', [PengukuranController::class, 'edit'])->name('pengukuran.edit');
+        Route::put('pengukuran/{pengukuran}/save', [PengukuranController::class, 'save'])->name('pengukuran.save');
+        Route::delete('pengukuran/{pengukuran}/delete', [PengukuranController::class, 'destroy'])->name('pengukuran.delete');
 
         // Laporan
         Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');

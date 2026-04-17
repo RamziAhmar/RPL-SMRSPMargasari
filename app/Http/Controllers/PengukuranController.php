@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Balita;
 use App\Models\Pengukuran;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -152,5 +153,60 @@ class PengukuranController extends Controller
             ->get(['tanggal_ukur', 'bb_kg', 'tb_cm']);
 
         return response()->json($pengukurans);
+    }
+
+    public function edit($id)
+    {
+        $pengukuran = Pengukuran::findOrFail($id);
+
+        $balita = Balita::all();
+        $user = User::all();
+
+        return view('pengukuran.edit', compact('pengukuran', 'balita', 'user'));
+    }
+
+    public function save(Request $request, $id)
+    {
+        $pengukuran = Pengukuran::findOrFail($id);
+
+
+        $request->validate([
+            'bb_kg' => 'required|numeric',
+            'tb_cm' => 'required|numeric',
+            'lila_cm' => 'required|numeric',
+        ]);
+
+        $response = Http::post('http://127.0.0.1:5000/predict', [
+            'umur' => $pengukuran->umur_bulan,
+            'tinggi' => $pengukuran->tb_cm,
+            'delta_tinggi' => 0.5,
+            'gender' => $pengukuran->balita->jenis_kelamin == 'L' ? 'L' : 'P'
+        ]);
+
+        // dd($response->body());
+
+        $pengukuran->update([
+            'id_balita' => $pengukuran->id_balita,
+            'id_user' => $pengukuran->id_user,
+            'tanggal_ukur' => $pengukuran->tanggal_ukur,
+            'umur_bulan' => $pengukuran->umur_bulan,
+            'bb_kg' => $request->bb_kg,
+            'tb_cm' => $request->tb_cm,
+            'lila_cm' => $request->lila_cm,
+            'status_stunting' => $response->json()['status_stunting'],
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('pengukuran.index', $pengukuran->id_balita)
+            ->with('success', 'Data berhasil diupdate');
+    }
+
+    public function destroy($id)
+    {
+        $pengukuran = Pengukuran::findOrFail($id);
+        $pengukuran->delete();
+
+        return redirect()->route('pengukuran.index', $pengukuran->id_balita)
+            ->with('success', 'Data berhasil dihapus');
     }
 }

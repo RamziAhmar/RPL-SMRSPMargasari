@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use App\Helpers\WhoHelper;
 
 class BalitaPengukuranSeeder extends Seeder
 {
@@ -22,20 +23,19 @@ class BalitaPengukuranSeeder extends Seeder
         // Pastikan ada minimal 1 user yang akan menjadi pengukur
         $user = User::first();
 
-        if (! $user) {
-            $user = User::create([
-                'nama'     => 'Admin Posyandu',
-                'username' => 'admin',
-                'email'    => 'admin@example.com',
-                'password' => Hash::make('password'), // ganti nanti
-                'role'     => 'admin',
-            ]);
-        }
+        // if (! $user) {
+        //     $user = User::create([
+        //         'nama'     => 'Admin Posyandu',
+        //         'username' => 'admin',
+        //         'email'    => 'admin@example.com',
+        //         'password' => Hash::make('password'), // ganti nanti
+        //         'role'     => 'admin',
+        //     ]);
+        // }
 
         // Buat 20 balita
         for ($i = 0; $i < 20; $i++) {
 
-            // Tanggal lahir antara 1 – 5 tahun lalu
             $tanggalLahir = Carbon::instance(
                 $faker->dateTimeBetween('-5 years', '-1 year')
             )->startOfDay();
@@ -47,33 +47,70 @@ class BalitaPengukuranSeeder extends Seeder
                 'nama_ibu'      => $faker->name('female'),
             ]);
 
-            // 3 kali pengukuran per balita
-            for ($j = 0; $j < 3; $j++) {
+            // 🎯 tentukan tipe anak (20% stunting)
+            $type = rand(1, 100) <= 20 ? 'stunting' : 'normal';
 
-                // Tanggal ukur: beberapa bulan setelah lahir
-                $tanggalUkur = (clone $tanggalLahir)->addMonths(12 + $j * 3 + rand(0, 2));
+            // umur sekarang
+            $umurSekarang = rand(12, 59);
 
-                // Jangan lewat hari ini
+            $umurList = [
+                $umurSekarang - 2,
+                $umurSekarang - 1,
+                $umurSekarang
+            ];
+
+            $tinggi = null;
+
+            foreach ($umurList as $umur) {
+
+                $tanggalUkur = (clone $tanggalLahir)->addMonths($umur);
+
                 if ($tanggalUkur->greaterThan(now())) {
-                    $tanggalUkur = now()->subDays(rand(0, 30));
+                    $tanggalUkur = now();
                 }
 
-                $umurBulan = $tanggalLahir->diffInMonths($tanggalUkur);
+                $median = WhoHelper::getMedian($umur, $balita->jenis_kelamin);
 
-                // Perkiraan kasar antropometri (bukan standar WHO, hanya dummy)
-                $tb = $faker->numberBetween(60, 110);          // tinggi cm
-                $bb = round($tb / 10 + rand(0, 5), 1);         // berat kg kira-kira
-                $lila = $faker->randomFloat(1, 10, 20);        // cm
+                // =========================
+                // TINGGI AWAL
+                // =========================
+                if ($tinggi === null) {
+
+                    if ($type == 'stunting') {
+                        // jauh di bawah median
+                        $tinggi = $median - rand(6, 10);
+                    } else {
+                        // normal sekitar median
+                        $tinggi = $median + rand(-2, 2);
+                    }
+                } else {
+
+                    $delta = WhoHelper::deltaTinggi($umur, $balita->jenis_kelamin);
+
+                    if ($type == 'stunting') {
+                        // pertumbuhan lebih lambat
+                        $tinggi += ($delta * rand(60, 80) / 100);
+                    } else {
+                        // pertumbuhan normal
+                        $tinggi += $delta + (rand(-1, 1) * 0.2);
+                    }
+                }
+
+                // =========================
+                // HITUNG STATUS WHO
+                // =========================
+                $z = WhoHelper::zScore($tinggi, $umur, $balita->jenis_kelamin);
+                $status = $z < -2 ? 1 : 0;
 
                 Pengukuran::create([
-                    'id_balita'      => $balita->id_balita,
-                    'id_user'        => $user->id,
-                    'tanggal_ukur'   => $tanggalUkur->toDateString(),
-                    'umur_bulan'     => $umurBulan,
-                    'bb_kg'          => $bb,
-                    'tb_cm'          => $tb,
-                    'lila_cm'        => $lila,
-                    'status_stunting' => $faker->boolean(20), // 20% kemungkinan stunting
+                    'id_balita'       => $balita->id_balita,
+                    'id_user'         => $user->id,
+                    'tanggal_ukur'    => $tanggalUkur->toDateString(),
+                    'umur_bulan'      => $umur,
+                    'bb_kg'           => round($tinggi / 10 + rand(0, 2), 1),
+                    'tb_cm'           => round($tinggi, 1),
+                    'lila_cm'         => $faker->randomFloat(1, 10, 20),
+                    'status_stunting' => $status,
                 ]);
             }
         }

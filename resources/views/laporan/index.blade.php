@@ -19,6 +19,20 @@
                         class="border rounded px-3 py-2">
                 </div>
                 <div>
+                    <label class="block text-sm font-medium mb-1">Status</label>
+                    <select name="status" class="border rounded px-7 py-2">
+                        <option value="">Semua</option>
+                        <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Stunting</option>
+                        <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Aman</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Nama Balita</label>
+                    <input type="text" name="nama" value="{{ request('nama') }}" placeholder="Cari nama..."
+                        class="border rounded px-3 py-2">
+                </div>
+                <div>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">
                         Tampilkan
                     </button>
@@ -41,11 +55,12 @@
                 <table class="w-full border">
                     <thead>
                         <tr class="bg-gray-100">
-                            <th class="border px-2 py-1 text-left">Tanggal</th>
-                            <th class="border px-2 py-1 text-left">Nama Balita</th>
-                            <th class="border px-2 py-1 text-right">TB (cm)</th>
-                            <th class="border px-2 py-1 text-right">BB (kg)</th>
-                            <th class="border px-2 py-1 text-right">LILA (cm)</th>
+                            <th class="border px-2 py-1 text-center w-1/6">Tanggal</th>
+                            <th class="border px-2 py-1 text-center">Nama Balita</th>
+                            <th class="border py-1 text-center">JK</th>
+                            <th class="border px-2 py-1 text-center">TB (cm)</th>
+                            <th class="border px-2 py-1 text-center">BB (kg)</th>
+                            <th class="border px-2 py-1 text-center">LILA (cm)</th>
                             <th class="border px-2 py-1 text-center">Status</th>
                         </tr>
                     </thead>
@@ -54,9 +69,10 @@
                             <tr>
                                 <td class="border px-2 py-1">{{ $p->created_at }}</td>
                                 <td class="border px-2 py-1">{{ $p->balita->nama }}</td>
-                                <td class="border px-2 py-1 text-right">{{ $p->tb_cm }}</td>
-                                <td class="border px-2 py-1 text-right">{{ $p->bb_kg }}</td>
-                                <td class="border px-2 py-1 text-right">{{ $p->lila_cm }}</td>
+                                <td class="border px-2 py-1 text-center">{{ $p->balita->jenis_kelamin }}</td>
+                                <td class="border px-2 py-1 text-center">{{ $p->tb_cm }}</td>
+                                <td class="border px-2 py-1 text-center">{{ $p->bb_kg }}</td>
+                                <td class="border px-2 py-1 text-center">{{ $p->lila_cm }}</td>
                                 <td class="border px-2 py-1 text-center">
                                     @if ($p->status_stunting)
                                         <span class="text-red-600 font-semibold">Stunting</span>

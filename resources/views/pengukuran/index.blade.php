@@ -11,6 +11,24 @@
             <x-back-button :href="route('balita.index')" />
         </div>
 
+        @if (session('success'))
+            <div id="success-alert"
+                class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+                role="alert">
+                <span class="block sm:inline">{{ session('success') }}</span>
+
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3"
+                    onclick="this.parentElement.style.display='none';">
+                    <svg class="fill-current h-6 w-6 text-green-500 cursor-pointer" role="button"
+                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path
+                            d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+                    </svg>
+                </span>
+            </div>
+        @endif
+
         <div class="bg-white p-5 shadow-sm sm:rounded-xl mb-6 border border-gray-100">
             <h3 class="text-lg font-semibold mb-4 text-gray-700">
                 Data Balita
@@ -28,7 +46,7 @@
                 <div>
                     <p class="text-gray-500">Tanggal Lahir</p>
                     <p class="font-semibold text-gray-800">
-                        {{ \Carbon\Carbon::parse($balita->tanggal_lahir)->format('d M Y') . ' (' . floor(\Carbon\Carbon::parse($balita->tanggal_lahir)->diffInDays(now()) / 30) . ' bulan)' }} 
+                        {{ \Carbon\Carbon::parse($balita->tanggal_lahir)->format('d M Y') . ' (' . floor(\Carbon\Carbon::parse($balita->tanggal_lahir)->diffInDays(now()) / 30) . ' bulan)' }}
                     </p>
                 </div>
 
@@ -127,6 +145,8 @@
                         <th class="py-2 text-left">TB (cm)</th>
                         <th class="py-2 text-left">LILA (cm)</th>
                         <th class="py-2 text-left">Status Stunting</th>
+                        <th class="py-2 text-left">Aksi</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -142,10 +162,57 @@
                             @else
                                 <td class="py-2 text-red-600 font-semibold">Stunting</td>
                             @endif
+                            <td class="py-2">
+                                <a href="{{ route('pengukuran.edit', $p) }}" class="text-yellow-600">
+                                    Edit
+                                </a> |
+                                <form action="{{ route('pengukuran.delete', $p) }}" method="POST" class="inline">
+                                    @csrf @method('DELETE')
+                                    <button type="button"
+                                        onclick="openDeleteModal('{{ route('pengukuran.delete', $p) }}')"
+                                        class="text-red-600">
+                                        Hapus
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+
+            <!-- Modal -->
+            <div id="deleteModal"
+                class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 transition-opacity duration-300 opacity-0">
+
+                <div id="modalBox"
+                    class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 transform scale-95 opacity-0 transition-all duration-300">
+
+                    <h2 class="text-lg font-semibold mb-2 text-gray-800">
+                        Konfirmasi Hapus
+                    </h2>
+
+                    <p class="text-sm text-gray-600 mb-6">
+                        Yakin ingin menghapus data ini? Data tidak bisa dikembalikan.
+                    </p>
+
+                    <div class="flex justify-end gap-2">
+                        <button onclick="closeDeleteModal()"
+                            class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm transition">
+                            Batal
+                        </button>
+
+                        <form id="deleteForm" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button
+                                class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm transition">
+                                Ya, Hapus
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -336,4 +403,39 @@
             this.classList.add(`active-${color}`);
         });
     });
+</script>
+
+<script>
+    function openDeleteModal(actionUrl) {
+        const modal = document.getElementById('deleteModal');
+        const box = document.getElementById('modalBox');
+        const form = document.getElementById('deleteForm');
+
+        form.action = actionUrl;
+
+        // FIX: tambahkan flex
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modal.classList.add('opacity-100');
+
+            box.classList.remove('scale-95', 'opacity-0');
+            box.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function closeDeleteModal() {
+        const modal = document.getElementById('deleteModal');
+        const box = document.getElementById('modalBox');
+
+        modal.classList.add('opacity-0');
+        box.classList.add('scale-95', 'opacity-0');
+
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex'); // FIX juga di sini
+        }, 300);
+    }
 </script>
