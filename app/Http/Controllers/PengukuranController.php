@@ -61,6 +61,7 @@ class PengukuranController extends Controller
                 \Log::error("API error: " . $e->getMessage());
             }
         }
+        
 
         return view('pengukuran.index', compact(
             'balita',
